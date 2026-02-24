@@ -1,0 +1,15 @@
+version: '1.0'
+
+services:
+  dropken:
+    build: .
+    container_name: dropken
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./data:/app/data
+      - ./uploads:/app/uploads
+    environment:
+      - NODE_ENV=production
+      - PORT=3000

@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Dropken - Drop files. Instantly.</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Socket.io -->
+    <script src="/socket.io/socket.io.js"></script>
+    <!-- QR Scanner (html5-qrcode) -->
+    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+</head>
+
+<body>
+
+    <!-- Notification Toast -->
+    <div id="toast" class="toast hidden"></div>
+
+    <!-- View: Home / Loading -->
+    <div id="view-home" class="view active">
+        <div class="logo">
+            <h1>Dropken</h1>
+            <p>Drop files. Instantly.</p>
+        </div>
+
+        <div class="user-card">
+            <h3>Your Device</h3>
+            <div class="name-edit-group">
+                <input type="text" id="user-name-input" disabled>
+                <button id="btn-edit-name"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2">
+                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                    </svg></button>
+                <button id="btn-save-name" class="hidden"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2">
+                        <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+                        <polyline points="17 21 17 13 7 13 7 21"></polyline>
+                        <polyline points="7 3 7 8 15 8"></polyline>
+                    </svg></button>
+            </div>
+        </div>
+        <!-- QR Code Display Area (for joining) -->
+        <div id="home-qr-display" class="qr-container hidden">
+            <h4>Scan to pull me in</h4>
+            <img id="pairing-qr-img" src="" alt="Pairing QR">
+            <button id="btn-close-pairing-qr">Close</button>
+        </div>
+        <div class="action-grid">
+            <button id="btn-create-room" class="primary-btn">Create Room</button>
+
+            <div class="divider">or</div>
+
+            <div class="join-actions">
+                <button id="btn-show-qr-join" class="secondary-btn">Show QR (Let someone scan)</button>
+                <button id="btn-scan-qr-join" class="secondary-btn">Scan QR (Join existing)</button>
+            </div>
+        </div>
+
+
+    </div>
+
+    <!-- View: Room Chat -->
+    <div id="view-room" class="view hidden">
+        <header class="room-header">
+            <div>
+                <h2 id="room-title">Room Chat</h2>
+                <span id="room-status">Connecting...</span>
+            </div>
+            <button id="btn-room-options" class="icon-btn"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="3"></circle>
+                    <path
+                        d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z">
+                    </path>
+                </svg></button>
+        </header>
+
+        <!-- Pinned Messages Bar -->
+        <div id="pinned-messages-container" class="pinned-container hidden">
+            <div class="pinned-header" id="btn-toggle-pins">
+                <div class="pin-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2">
+                        <line x1="12" y1="17" x2="12" y2="22"></line>
+                        <path
+                            d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.68V6a3 3 0 0 0-3-3h-0a3 3 0 0 0-3 3v4.68a2 2 0 0 1-1.11 1.87l-1.78.9A2 2 0 0 0 5 15.24Z">
+                        </path>
+                    </svg></div>
+                <div class="pinned-text"><span id="pin-count">0</span> Pinned Messages</div>
+                <div style="margin-left:auto;">▼</div>
+            </div>
+            <div id="pinned-list" class="pinned-list">
+                <!-- Pinned items injected here -->
+            </div>
+        </div>
+
+        <!-- Chat Area (Drag & Drop Target) -->
+        <div id="chat-area" class="chat-area">
+            <div id="drop-overlay" class="drop-overlay hidden">
+                <div class="drop-text">Release to Upload</div>
+            </div>
+
+            <div id="messages-list" class="messages-list">
+                <!-- Messages will be injected here -->
+            </div>
+        </div>
+
+        <!-- Input Area -->
+        <footer class="room-footer">
+            <button class="icon-btn" id="btn-attach" title="Attach Files">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path
+                        d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48">
+                    </path>
+                </svg></button>
+            <input type="file" id="file-input" class="hidden" multiple>
+            <textarea id="message-input" placeholder="Type a message..." rows="1"></textarea>
+            <button id="btn-send" class="icon-btn send-btn"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" style="position:relative; right:1px; top:1px;">
+                    <line x1="22" y1="2" x2="11" y2="13"></line>
+                    <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                </svg></button>
+        </footer>
+
+        <!-- Room Options Modal -->
+        <div id="modal-options" class="modal hidden">
+            <div class="modal-content">
+                <h3>Room Options</h3>
+
+                <div class="user-card" style="margin-bottom: 20px;">
+                    <div class="name-edit-group">
+                        <input type="text" id="options-user-name-input" disabled>
+                        <button id="btn-options-edit-name"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2">
+                                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                            </svg></button>
+                        <button id="btn-options-save-name" class="hidden"><svg width="14" height="14"
+                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+                                <polyline points="17 21 17 13 7 13 7 21"></polyline>
+                                <polyline points="7 3 7 8 15 8"></polyline>
+                            </svg></button>
+                    </div>
+                </div>
+
+                <div class="modal-section invite-section">
+                    <h4>Invite Device</h4>
+                    <button id="btn-invite-show-qr">Show Join QR</button>
+                    <button id="btn-invite-scan-qr">Scan Device QR</button>
+
+                    <div id="invite-qr-display" class="qr-container hidden">
+                        <img id="invite-room-qr-img" src="" alt="Room QR">
+                    </div>
+                </div>
+
+                <div class="modal-section">
+                    <h4>Members (<span id="member-count">0</span>)</h4>
+                    <ul id="members-list" class="members-list">
+                        <!-- Members injected here -->
+                    </ul>
+                </div>
+
+                <div class="modal-section" id="host-actions-section" style="display: none;">
+                    <h4>Host Actions</h4>
+                    <button id="btn-restore-all" class="secondary-btn" style="width: 100%;">Restore All Deleted
+                        Messages</button>
+                </div>
+
+                <button id="btn-leave-room" class="danger-btn">Leave Room</button>
+                <button id="btn-close-options" class="secondary-btn">Close</button>
+            </div>
+        </div>
+
+        <!-- Selection Action Bar -->
+        <div id="selection-action-bar" class="selection-action-bar">
+            <div class="selected-count"><span id="selected-count-text">0</span> selected</div>
+            <div class="actions">
+                <button id="btn-cancel-select" class="icon-btn">Cancel</button>
+                <button id="btn-restore-selected" class="secondary-btn hidden">Restore</button>
+                <button id="btn-delete-selected" class="danger-btn">Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: General QR Scanner -->
+    <div id="modal-scanner" class="modal hidden">
+        <div class="modal-content scanner-content">
+            <h3>Scan QR Code</h3>
+            <div id="reader" style="width: 100%; min-height: 250px;"></div>
+            <button id="btn-close-scanner" class="secondary-btn mt-2">Cancel</button>
+        </div>
+    </div>
+
+    <!-- App Logic -->
+    <script type="module" src="app.js"></script>
+</body>
+
+</html>
