@@ -32,6 +32,7 @@ async function initApp() {
 }
 
 // Bootstrap Application
+console.log("%cDropken %cby Moduken • github.com/moduken/dropken • threads.net/@moduken", "color: #3b82f6; font-weight: bold; font-size: 14px;", "color: gray; font-size: 12px;");
 setupUI();
 setupSocketListeners();
 initApp();

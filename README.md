@@ -60,6 +60,13 @@ If you prefer to run it locally without Docker:
 - **Frontend**: HTML5, Vanilla JS, CSS
 - **Database**: SQLite (better-sqlite3)
 
+## Support & Contact 🤝
+
+- Threads: [@moduken](https://threads.net/@moduken)
+
 ## License 📄
 
 This project is licensed under the [MIT License](LICENSE).
+
+---
+&copy; 2026 Moduken
